@@ -316,13 +316,11 @@ def getGameStatus(gameId):
 	global LAST_API_REQUEST
 	if LAST_API_REQUEST is not None:
 		if time.time() - LAST_API_REQUEST <= 2:
-			print("rip1")
 			return None
 	LAST_API_REQUEST = time.time()
 	try:
 		jsonurl = urllib.request.urlopen(url)
 	except:
-		print("rip")
 		return None
 	jsonstr = jsonurl.read().decode("utf-8")
 	game_info = json.loads(jsonstr)
@@ -343,30 +341,27 @@ def getGameStatus(gameId):
 			elif team["win"] == "Fail":
 				win = False
 				print("loss")
-	print("done")
 	return win
 
 random.seed()
 cur_game_id = None
 while True:
 	response = twitch.recv(1024).decode("utf-8")
-	print(cur_game_id)
 	if response == "PING :tmi.twitch.tv\r\n":
 		twitch.send("PONG :tmi.twitch.tv\r\n".encode("utf-8"))
-		print("ping")
 	else:
 		username = re.search(r"\w+", response).group(0)
 		message = CHAT_MSG.sub("", response)
 		print(username + ": " + message)
 		handleCommand(message,username)
 	if cur_game_id is not None:
-		print("huh")
 		status = getGameStatus(cur_game_id)
-		if status:
-			chat("The game has been won!")
-		else:
-			chat("The game was lost!")
-		cur_game_id = None
+		if status is not None:
+			if status:
+				chat("The game has been won!")
+			else:
+				chat("The game was lost!")
+			cur_game_id = None
 	else:
 		temp = getGameId()
 		if temp is not None:
